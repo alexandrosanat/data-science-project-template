@@ -39,17 +39,20 @@ class Runner:
             batch_accuracy = self._run_single(x, y)
             experiment.add_batch_metric('accuracy', batch_accuracy, self.run_count)
 
-    def _run_single(self, x, y):
+    def _run_single(self, x: Any, y: Any):
         self.run_count += 1
-        batch_size = x.shape[0]
+        batch_size: int = x.shape[0]
         prediction = self.model(x)
         loss = self.compute_loss(prediction, y)
 
-        # Compute Batch Metrics
+        # Compute Batch Validation Metrics
         y_np = y.detach().numpy()
         y_prediction_np = np.argmax(prediction.detach().numpy(), axis=1)
         batch_accuracy: float = accuracy_score(y_np, y_prediction_np)
         self.accuracy_metric.update(batch_accuracy, batch_size)
+
+        self.y_true_batches += [y_np]
+        self.y_pred_batches += [y_prediction_np]
 
         if self.optimizer is not None:
             # Reverse-mode AutoDiff (backpropagation)

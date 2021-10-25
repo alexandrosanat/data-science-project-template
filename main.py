@@ -41,7 +41,7 @@ def main():
         experiment.add_epoch_metric("accuracy", train_runner.avg_accuracy, epoch)
 
         experiment.set_stage(Stage.VAL)
-        train_runner.run("Validation batches", experiment)
+        test_runner.run("Validation batches", experiment)
 
         # Log Training Epoch Metrics
         experiment.add_epoch_metric("accuracy", test_runner.avg_accuracy, epoch)
