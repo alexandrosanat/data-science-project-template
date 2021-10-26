@@ -1,4 +1,6 @@
 import torch
+import hydra
+from omegaconf import DictConfig
 
 from src.dataset import get_train_dataloader, get_test_dataloader
 from src.models import LinearNet
@@ -16,14 +18,15 @@ hparams = {
 }
 
 
-def main():
+@hydra.main(config_path="conf", config_name="config")
+def main(cfg: DictConfig):
     # Data
-    train_loader = get_train_dataloader(batch_size=hparams.get('BATCH_SIZE'))
-    test_loader = get_test_dataloader(batch_size=hparams.get('BATCH_SIZE'))
+    train_loader = get_train_dataloader(batch_size=cfg.hparams.batch_size)
+    test_loader = get_test_dataloader(batch_size=cfg.hparams.batch_size)
 
     # Model and Optimizer
     model = LinearNet()
-    optimizer = torch.optim.Adam(model.parameters(), lr=hparams.get('LR'))
+    optimizer = torch.optim.Adam(model.parameters(), lr=cfg.hparams.lr)
 
     # Create the runners
     test_runner = Runner(test_loader, model)
@@ -33,7 +36,7 @@ def main():
     log_dir = generate_tensorboard_experiment_directory(root='./runs')
     experiment = TensorboardExperiment(log_dir=log_dir)
 
-    for epoch in range(hparams.get('EPOCHS')):
+    for epoch in range(cfg.hparams.epochs):
         experiment.set_stage(Stage.TRAIN)
         train_runner.run("Train batches", experiment)
 
@@ -51,7 +54,7 @@ def main():
 
         # Compute Average Epoch Metrics
         summary = ', '.join([
-            f"[Epoch: {epoch + 1}/{hparams.get('EPOCHS')}]",
+            f"[Epoch: {epoch + 1}/{cfg.hparams.epochs}]",
             f"Test Accuracy: {test_runner.avg_accuracy: 0.4f}",
             f"Train Accuracy: {train_runner.avg_accuracy: 0.4f}",
         ])

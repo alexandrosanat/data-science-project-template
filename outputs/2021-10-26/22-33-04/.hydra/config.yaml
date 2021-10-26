@@ -1,0 +1,5 @@
+hparams:
+  epochs: 20
+  lr: 5.0e-05
+  optimizer: Adam
+  batch_size: 128
